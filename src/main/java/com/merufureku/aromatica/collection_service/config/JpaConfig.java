@@ -14,7 +14,7 @@ public class JpaConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(DataSource dataSource) {
         var emf = new LocalContainerEntityManagerFactoryBean();
         emf.setDataSource(dataSource);
-        emf.setPackagesToScan("com.merufureku.aromatica.collection-service.dao.entity");
+        emf.setPackagesToScan("com.merufureku.aromatica.collection_service.dao.entity");
         emf.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
         return emf;
     }

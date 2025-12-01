@@ -24,8 +24,8 @@ public class SwaggerConfig {
                                         .bearerFormat("JWT")
                                         .in(SecurityScheme.In.HEADER)))
                 .info(new Info()
-                .title("Fragrance Management API")
+                .title("Collection Management API")
                 .version("1.0")
-                .description("API Documentation for Fragrance Management"));
+                .description("API Documentation for Collection Management"));
     }
 }

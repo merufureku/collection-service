@@ -48,7 +48,7 @@ public class CollectionServiceImpl implements ICollectionService {
 
         var fragranceList = fragrancesRepository.findAllById(collectionsFragranceIds);
 
-        List<CollectionsResponse.FragranceDetails> fragranceDetailsList = fragranceList.stream()
+        var fragranceDetailsList = fragranceList.stream()
                 .map(fragrance -> new CollectionsResponse.FragranceDetails(
                         fragrance.getId(),
                         fragrance.getName(),

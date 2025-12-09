@@ -3,10 +3,13 @@ package com.merufureku.aromatica.collection_service.helper;
 import com.merufureku.aromatica.collection_service.dao.entity.Token;
 import com.merufureku.aromatica.collection_service.dao.repository.TokenRepository;
 import com.merufureku.aromatica.collection_service.exceptions.ServiceException;
+import com.merufureku.aromatica.collection_service.utilities.TokenUtility;
+import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
@@ -28,6 +31,9 @@ public class TokenHelperTest {
     @Mock
     private TokenRepository tokenRepository;
 
+    @Mock
+    private TokenUtility tokenUtility;
+
     private static final Integer USER_ID = 1;
     private static final String TOKEN = "sampleAccessToken";
     private static final String INVALID_TOKEN = "invalidToken";
@@ -36,7 +42,7 @@ public class TokenHelperTest {
     @Test
     public void testValidateAccessToken_ValidToken() {
 
-        var token = Token.builder()
+        Token token = Token.builder()
                 .userId(USER_ID)
                 .token(TOKEN)
                 .jti(JTI)
@@ -96,6 +102,26 @@ public class TokenHelperTest {
         assertThrows(ServiceException.class, () ->
                 tokenHelper.validateAccessToken(USER_ID, JTI, TOKEN)
         );
+    }
+
+    @Test
+    void validateInternalToken_shouldNotThrow_whenServiceIsValid() {
+        Claims claims = Mockito.mock(Claims.class);
+
+        when(tokenUtility.validateInternalToken(anyString())).thenReturn(claims);
+        when(tokenUtility.isValidService(claims)).thenReturn(true);
+
+        assertDoesNotThrow(() -> tokenHelper.validateInternalToken("internalTokenSample"));
+    }
+
+    @Test
+    void validateInternalToken_shouldThrow_whenServiceIsInvalid() {
+        Claims claims = Mockito.mock(Claims.class);
+
+        when(tokenUtility.validateInternalToken(anyString())).thenReturn(claims);
+        when(tokenUtility.isValidService(claims)).thenReturn(false);
+
+        assertThrows(ServiceException.class, () -> tokenHelper.validateInternalToken("internalTokenSample"));
     }
 
 }

@@ -7,7 +7,7 @@ import com.merufureku.aromatica.collection_service.dao.repository.FragrancesRepo
 import com.merufureku.aromatica.collection_service.dto.params.BaseParam;
 import com.merufureku.aromatica.collection_service.dto.responses.AddToCollectionResponse;
 import com.merufureku.aromatica.collection_service.dto.responses.BaseResponse;
-import com.merufureku.aromatica.collection_service.dto.responses.CollectionsResponse;
+import com.merufureku.aromatica.collection_service.dto.responses.UserCollectionsResponse;
 import com.merufureku.aromatica.collection_service.exceptions.ServiceException;
 import com.merufureku.aromatica.collection_service.helper.ValidationHelper;
 import com.merufureku.aromatica.collection_service.services.impl.CollectionServiceImpl;
@@ -82,7 +82,7 @@ class CollectionServiceImplTest {
         when(collectionsRepository.findByUserId(USER_ID)).thenReturn(collections);
         when(fragrancesRepository.findAllById(List.of(1L, 2L))).thenReturn(fragrances);
 
-        BaseResponse<CollectionsResponse> response = collectionServiceImpl
+        BaseResponse<UserCollectionsResponse> response = collectionServiceImpl
                 .getUserCollections(USER_ID, baseParam);
 
         assertEquals(200, response.status());
@@ -113,7 +113,7 @@ class CollectionServiceImplTest {
         when(collectionsRepository.findByUserId(USER_ID)).thenReturn(new ArrayList<>());
         when(fragrancesRepository.findAllById(new ArrayList<>())).thenReturn(new ArrayList<>());
 
-        BaseResponse<CollectionsResponse> response = collectionServiceImpl
+        BaseResponse<UserCollectionsResponse> response = collectionServiceImpl
                 .getUserCollections(USER_ID, baseParam);
 
         assertEquals(200, response.status());

@@ -3,7 +3,7 @@ package com.merufureku.aromatica.collection_service.controller;
 import com.merufureku.aromatica.collection_service.dto.params.BaseParam;
 import com.merufureku.aromatica.collection_service.dto.responses.AddToCollectionResponse;
 import com.merufureku.aromatica.collection_service.dto.responses.BaseResponse;
-import com.merufureku.aromatica.collection_service.dto.responses.CollectionsResponse;
+import com.merufureku.aromatica.collection_service.dto.responses.UserCollectionsResponse;
 import com.merufureku.aromatica.collection_service.services.interfaces.ICollectionService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.apache.logging.log4j.LogManager;
@@ -26,8 +26,8 @@ public class CollectionController {
 
     @GetMapping
     @Operation(summary = "Get User's Collection")
-    public ResponseEntity<BaseResponse<CollectionsResponse>> getUserCollection(@RequestParam(required = false, defaultValue = "1") int version,
-                                                                               @RequestParam(required = false, defaultValue = "") String correlationId) {
+    public ResponseEntity<BaseResponse<UserCollectionsResponse>> getUserCollection(@RequestParam(required = false, defaultValue = "1") int version,
+                                                                                   @RequestParam(required = false, defaultValue = "") String correlationId) {
 
         var baseParam = new BaseParam(version, correlationId);
         var response = collectionService.getUserCollections(getUserId(), baseParam);

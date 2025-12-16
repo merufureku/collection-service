@@ -6,7 +6,7 @@ import com.merufureku.aromatica.collection_service.dao.repository.FragrancesRepo
 import com.merufureku.aromatica.collection_service.dto.params.BaseParam;
 import com.merufureku.aromatica.collection_service.dto.responses.AddToCollectionResponse;
 import com.merufureku.aromatica.collection_service.dto.responses.BaseResponse;
-import com.merufureku.aromatica.collection_service.dto.responses.CollectionsResponse;
+import com.merufureku.aromatica.collection_service.dto.responses.UserCollectionsResponse;
 import com.merufureku.aromatica.collection_service.helper.ValidationHelper;
 import com.merufureku.aromatica.collection_service.services.interfaces.ICollectionService;
 import org.apache.logging.log4j.LogManager;
@@ -34,7 +34,7 @@ public class CollectionServiceImpl implements ICollectionService {
     }
 
     @Override
-    public BaseResponse<CollectionsResponse> getUserCollections(Integer userId, BaseParam baseParam) {
+    public BaseResponse<UserCollectionsResponse> getUserCollections(Integer userId, BaseParam baseParam) {
 
         logger.info("Fetching collection for user ID: {}", userId);
 
@@ -48,7 +48,7 @@ public class CollectionServiceImpl implements ICollectionService {
         var fragranceList = fragrancesRepository.findAllById(collectionsFragranceIds);
 
         var fragranceDetailsList = fragranceList.stream()
-                .map(fragrance -> new CollectionsResponse.FragranceDetails(
+                .map(fragrance -> new UserCollectionsResponse.FragranceDetails(
                         fragrance.getId(),
                         fragrance.getName(),
                         fragrance.getBrand(),
@@ -56,7 +56,7 @@ public class CollectionServiceImpl implements ICollectionService {
                 ))
                 .toList();
 
-        var response = new CollectionsResponse(userId, fragranceDetailsList);
+        var response = new UserCollectionsResponse(userId, fragranceDetailsList);
 
         return new BaseResponse<>(HttpStatus.OK.value(), "User collection fetched successfully", response);
     }

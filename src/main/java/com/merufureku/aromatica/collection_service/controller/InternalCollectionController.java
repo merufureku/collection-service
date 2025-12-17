@@ -5,7 +5,7 @@ import com.merufureku.aromatica.collection_service.dto.params.GetFragranceBatchP
 import com.merufureku.aromatica.collection_service.dto.responses.BaseResponse;
 import com.merufureku.aromatica.collection_service.dto.responses.CollectionsResponse;
 import com.merufureku.aromatica.collection_service.dto.responses.UserCollectionsResponse;
-import com.merufureku.aromatica.collection_service.services.interfaces.IInternalCollectionService;
+import com.merufureku.aromatica.collection_service.services.factory.InternalCollectionServiceFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("internal/collections")
 public class InternalCollectionController {
 
-    private final IInternalCollectionService internalCollectionService;
+    private final InternalCollectionServiceFactory internalCollectionServiceFactory;
 
-    public InternalCollectionController(IInternalCollectionService internalCollectionService) {
-        this.internalCollectionService = internalCollectionService;
+    public InternalCollectionController(InternalCollectionServiceFactory internalCollectionServiceFactory) {
+        this.internalCollectionServiceFactory = internalCollectionServiceFactory;
     }
 
     @PostMapping("/batch")
@@ -29,7 +29,8 @@ public class InternalCollectionController {
             @RequestParam(required = false, defaultValue = "") String correlationId) {
 
         var baseParam = new BaseParam(version, correlationId);
-        var response = internalCollectionService.getCollections(excludedUserId, param, baseParam);
+        var response = internalCollectionServiceFactory.getService(version)
+                .getCollections(excludedUserId, param, baseParam);
 
         return ResponseEntity.ok(response);
     }
@@ -42,7 +43,8 @@ public class InternalCollectionController {
             @RequestParam(required = false, defaultValue = "") String correlationId) {
 
         var baseParam = new BaseParam(version, correlationId);
-        var response = internalCollectionService.getUserCollections(userId, baseParam);
+        var response = internalCollectionServiceFactory.getService(version)
+                .getUserCollections(userId, baseParam);
 
         return ResponseEntity.ok(response);
     }

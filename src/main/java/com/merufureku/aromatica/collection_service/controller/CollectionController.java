@@ -4,10 +4,8 @@ import com.merufureku.aromatica.collection_service.dto.params.BaseParam;
 import com.merufureku.aromatica.collection_service.dto.responses.AddToCollectionResponse;
 import com.merufureku.aromatica.collection_service.dto.responses.BaseResponse;
 import com.merufureku.aromatica.collection_service.dto.responses.UserCollectionsResponse;
-import com.merufureku.aromatica.collection_service.services.interfaces.ICollectionService;
+import com.merufureku.aromatica.collection_service.services.factory.CollectionServiceFactory;
 import io.swagger.v3.oas.annotations.Operation;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/collections")
 public class CollectionController {
 
-    private final Logger logger = LogManager.getLogger(this.getClass());
+    private final CollectionServiceFactory collectionServiceFactory;
 
-    private final ICollectionService collectionService;
-
-    public CollectionController(ICollectionService collectionService) {
-        this.collectionService = collectionService;
+    public CollectionController(CollectionServiceFactory collectionServiceFactory) {
+        this.collectionServiceFactory = collectionServiceFactory;
     }
 
     @GetMapping
@@ -30,7 +26,8 @@ public class CollectionController {
                                                                                    @RequestParam(required = false, defaultValue = "") String correlationId) {
 
         var baseParam = new BaseParam(version, correlationId);
-        var response = collectionService.getUserCollections(getUserId(), baseParam);
+        var response = collectionServiceFactory.getService(version)
+                .getUserCollections(getUserId(), baseParam);
 
         return ResponseEntity.ok(response);
     }
@@ -41,7 +38,8 @@ public class CollectionController {
                                                                                     @RequestParam(required = false, defaultValue = "1") int version,
                                                                                     @RequestParam(required = false, defaultValue = "") String correlationId) {
         var baseParam = new BaseParam(version, correlationId);
-        var response = collectionService.addToCollection(getUserId(), fragranceId, baseParam);
+        var response = collectionServiceFactory.getService(version)
+                .addToCollection(getUserId(), fragranceId, baseParam);
 
         return ResponseEntity.ok(response);
     }
@@ -53,7 +51,7 @@ public class CollectionController {
                                                      @RequestParam(required = false, defaultValue = "") String correlationId) {
 
         var baseParam = new BaseParam(version, correlationId);
-        collectionService.removeFromCollection(getUserId(), fragranceId, baseParam);
+        collectionServiceFactory.getService(version).removeFromCollection(getUserId(), fragranceId, baseParam);
 
         return ResponseEntity.noContent().build();
     }

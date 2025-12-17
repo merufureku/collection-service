@@ -19,7 +19,7 @@ import java.time.LocalDate;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class CollectionServiceImpl implements ICollectionService {
+public class CollectionServiceImpl1 implements ICollectionService {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -27,7 +27,7 @@ public class CollectionServiceImpl implements ICollectionService {
     private final FragrancesRepository fragrancesRepository;
     private final ValidationHelper validationHelper;
 
-    public CollectionServiceImpl(CollectionsRepository collectionsRepository, FragrancesRepository fragrancesRepository, ValidationHelper validationHelper) {
+    public CollectionServiceImpl1(CollectionsRepository collectionsRepository, FragrancesRepository fragrancesRepository, ValidationHelper validationHelper) {
         this.collectionsRepository = collectionsRepository;
         this.fragrancesRepository = fragrancesRepository;
         this.validationHelper = validationHelper;

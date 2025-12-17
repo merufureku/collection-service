@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 
 @Service
-public class InternalCollectionServiceImpl implements IInternalCollectionService {
+public class InternalCollectionServiceImpl1 implements IInternalCollectionService {
 
     private final Logger logger = LogManager.getLogger(this.getClass());
 
@@ -26,7 +26,7 @@ public class InternalCollectionServiceImpl implements IInternalCollectionService
     private final FragrancesRepository fragrancesRepository;
     private final ValidationHelper validationHelper;
 
-    public InternalCollectionServiceImpl(CollectionsRepository collectionsRepository, FragrancesRepository fragrancesRepository, ValidationHelper validationHelper) {
+    public InternalCollectionServiceImpl1(CollectionsRepository collectionsRepository, FragrancesRepository fragrancesRepository, ValidationHelper validationHelper) {
         this.collectionsRepository = collectionsRepository;
         this.fragrancesRepository = fragrancesRepository;
         this.validationHelper = validationHelper;

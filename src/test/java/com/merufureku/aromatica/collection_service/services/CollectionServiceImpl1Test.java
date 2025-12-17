@@ -5,11 +5,12 @@ import com.merufureku.aromatica.collection_service.dao.entity.Fragrance;
 import com.merufureku.aromatica.collection_service.dao.repository.CollectionsRepository;
 import com.merufureku.aromatica.collection_service.dao.repository.FragrancesRepository;
 import com.merufureku.aromatica.collection_service.dto.params.BaseParam;
+import com.merufureku.aromatica.collection_service.dto.responses.AddToCollectionResponse;
 import com.merufureku.aromatica.collection_service.dto.responses.BaseResponse;
 import com.merufureku.aromatica.collection_service.dto.responses.UserCollectionsResponse;
 import com.merufureku.aromatica.collection_service.exceptions.ServiceException;
 import com.merufureku.aromatica.collection_service.helper.ValidationHelper;
-import com.merufureku.aromatica.collection_service.services.impl.InternalCollectionServiceImpl;
+import com.merufureku.aromatica.collection_service.services.impl.CollectionServiceImpl1;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,10 +26,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class InternalCollectionServiceImplTest {
+class CollectionServiceImpl1Test {
 
     @InjectMocks
-    private InternalCollectionServiceImpl internalCollectionServiceImpl;
+    private CollectionServiceImpl1 collectionServiceImpl1;
 
     @Mock
     private CollectionsRepository collectionsRepository;
@@ -66,13 +67,11 @@ class InternalCollectionServiceImplTest {
                         .id(1L)
                         .name("Fragrance 1")
                         .brand("Brand A")
-                        .imageUrl("/img/1.png")
                         .build(),
                 Fragrance.builder()
                         .id(2L)
                         .name("Fragrance 2")
                         .brand("Brand B")
-                        .imageUrl("/img/2.png")
                         .build());
     }
 
@@ -83,7 +82,7 @@ class InternalCollectionServiceImplTest {
         when(collectionsRepository.findByUserId(USER_ID)).thenReturn(collections);
         when(fragrancesRepository.findAllById(List.of(1L, 2L))).thenReturn(fragrances);
 
-        BaseResponse<UserCollectionsResponse> response = internalCollectionServiceImpl
+        BaseResponse<UserCollectionsResponse> response = collectionServiceImpl1
                 .getUserCollections(USER_ID, baseParam);
 
         assertEquals(200, response.status());
@@ -102,7 +101,7 @@ class InternalCollectionServiceImplTest {
                 .when(validationHelper).validateUserId(USER_ID);
 
         ServiceException exception = assertThrows(ServiceException.class,
-                () -> internalCollectionServiceImpl.getUserCollections(USER_ID, baseParam));
+                () -> collectionServiceImpl1.getUserCollections(USER_ID, baseParam));
 
         assertEquals(NO_USER_FOUND, exception.getCustomStatusEnums());
     }
@@ -114,7 +113,7 @@ class InternalCollectionServiceImplTest {
         when(collectionsRepository.findByUserId(USER_ID)).thenReturn(new ArrayList<>());
         when(fragrancesRepository.findAllById(new ArrayList<>())).thenReturn(new ArrayList<>());
 
-        BaseResponse<UserCollectionsResponse> response = internalCollectionServiceImpl
+        BaseResponse<UserCollectionsResponse> response = collectionServiceImpl1
                 .getUserCollections(USER_ID, baseParam);
 
         assertEquals(200, response.status());
@@ -125,5 +124,96 @@ class InternalCollectionServiceImplTest {
         verify(collectionsRepository, times(1)).findByUserId(USER_ID);
         verify(fragrancesRepository, times(1)).findAllById(new ArrayList<>());
     }
-}
 
+    @Test
+    public void testAddToCollection_whenSuccess_thenReturnResponse() {
+
+        doNothing().when(validationHelper).validateUserAndFragranceIds(USER_ID, 1L);
+        doNothing().when(validationHelper).validateIfCollectionExists(USER_ID, 1L);
+        when(collectionsRepository.save(any(Collections.class))).thenReturn(collections.getFirst());
+
+        BaseResponse<AddToCollectionResponse> response = collectionServiceImpl1
+                .addToCollection(USER_ID, 1L, baseParam);
+
+        assertEquals(201, response.status());
+        assertEquals("Fragrance added to collection successfully", response.message());
+
+        verify(validationHelper, times(1)).validateUserAndFragranceIds(USER_ID, 1L);
+        verify(validationHelper, times(1)).validateIfCollectionExists(USER_ID, 1L);
+        verify(collectionsRepository, times(1)).save(any(Collections.class));
+    }
+
+    @Test
+    public void testAddToCollection_whenUserNotFound_thenThrowException() {
+
+        doThrow(new ServiceException(NO_USER_FOUND))
+                .when(validationHelper).validateUserAndFragranceIds(USER_ID, 1L);
+
+        ServiceException exception = assertThrows(ServiceException.class, () ->
+                collectionServiceImpl1.addToCollection(USER_ID, 1L, baseParam));
+
+        assertEquals(NO_USER_FOUND, exception.getCustomStatusEnums());
+    }
+
+    @Test
+    public void testAddToCollection_whenFragranceNotFound_thenThrowException() {
+
+        doThrow(new ServiceException(FRAGRANCE_NOT_FOUND))
+                .when(validationHelper).validateUserAndFragranceIds(USER_ID, 1L);
+
+        ServiceException exception = assertThrows(ServiceException.class, () ->
+                collectionServiceImpl1.addToCollection(USER_ID, 1L, baseParam));
+
+        assertEquals(FRAGRANCE_NOT_FOUND, exception.getCustomStatusEnums());
+    }
+
+    @Test
+    public void testAddToCollection_whenFragranceAlreadyInCollection_thenThrowException() {
+
+        doNothing().when(validationHelper).validateUserAndFragranceIds(USER_ID, 1L);
+        doThrow(new ServiceException(FRAGRANCE_ALREADY_EXIST))
+                .when(validationHelper).validateIfCollectionExists(USER_ID, 1L);
+
+        ServiceException exception = assertThrows(ServiceException.class, () ->
+                collectionServiceImpl1.addToCollection(USER_ID, 1L, baseParam));
+
+        assertEquals(FRAGRANCE_ALREADY_EXIST, exception.getCustomStatusEnums());
+    }
+
+    @Test
+    public void testRemoveFromCollection_whenSuccess_thenReturnResponse() {
+
+        doNothing().when(validationHelper).validateUserAndFragranceIds(USER_ID, 1L);
+        doNothing().when(collectionsRepository).deleteByUserIdAndFragranceId(USER_ID, 1L);
+
+        assertDoesNotThrow(() -> collectionServiceImpl1
+                .removeFromCollection(USER_ID, 1L, baseParam));
+
+        verify(validationHelper, times(1)).validateUserAndFragranceIds(USER_ID, 1L);
+        verify(collectionsRepository, times(1)).deleteByUserIdAndFragranceId(USER_ID, 1L);
+    }
+
+    @Test
+    public void testRemoveFromCollection_whenUserNotFound_thenThrowException() {
+
+        doThrow(new ServiceException(NO_USER_FOUND))
+                .when(validationHelper).validateUserAndFragranceIds(USER_ID, 1L);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> collectionServiceImpl1
+                .removeFromCollection(USER_ID, 1L, baseParam));
+
+        assertEquals(NO_USER_FOUND, exception.getCustomStatusEnums());
+    }
+
+    @Test
+    public void testRemoveFromCollection_whenFragranceNotFound_thenThrowException() {
+
+        doThrow(new ServiceException(FRAGRANCE_NOT_FOUND))
+                .when(validationHelper).validateUserAndFragranceIds(USER_ID, 1L);
+
+        ServiceException exception = assertThrows(ServiceException.class, () -> collectionServiceImpl1
+                .removeFromCollection(USER_ID, 1L, baseParam));
+
+        assertEquals(FRAGRANCE_NOT_FOUND, exception.getCustomStatusEnums());
+    }
+}
